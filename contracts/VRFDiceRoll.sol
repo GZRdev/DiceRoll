@@ -41,7 +41,7 @@ contract VRFDiceRoll is VRFConsumerBase {
 
     /*
     *constructor is inherited from VRFConsumerBase.
-    *The first parameter is an address for he VRF coordinator.
+    *The first parameter is an address for the VRF coordinator.
     *The second parameter is an address for the LINK token.
     *Both parameters obtained from docs.chain.link website.
      */
@@ -75,8 +75,9 @@ contract VRFDiceRoll is VRFConsumerBase {
         * bytes32 requestId is basically
         *   _keyHash
                 which is basically a 64 digit length hex string,
-        *   combined with
-                (64 digit length hex string + '_userSeed' + '_requester' + '_nonce')
+        *   concatenated with
+                (64 digit length hex string + uint256'_userSeed' + address'_requester' + uint256'_nonce')
+        *   After concatenation, this big long thing is converted into a 64 digit hex "string" that acts as your requestId.
         */ 
     }
 
