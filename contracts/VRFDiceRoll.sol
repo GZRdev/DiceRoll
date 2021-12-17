@@ -13,7 +13,19 @@ contract VRFDiceRoll is VRFConsumerBase {
     Fee - fee required to fulfill a VRF request
     */
 
+    /*
+    * keyHash is a 64 digit hex string.
+    * We use bytes 32 as the type for keyHash, because there are 8 bits in a byte.
+    * 256 bits required for allocation.
+    * 32 bytes * 8 bits in a byte = 256 bits.
+    * 256 / 64(cus it's a 64 digit hex string) = 4
+    * There are 4 bits per hex value (0-15) aka (0000 - 1111)
+    * We have 64 total hex values so 64 * 4 bits per value = 256 bits
+    * This is why we use bytes32 is my guess.
+    * Also, bytes(1-32) uses less gas than string.
+    */
     bytes32 internal keyHash;
+    
     uint256 internal fee;
 
     uint256 public randomResult;
@@ -27,17 +39,45 @@ contract VRFDiceRoll is VRFConsumerBase {
      * Key Hash: 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4
      */
 
+    /*
+    *constructor is inherited from VRFConsumerBase.
+    *The first parameter is an address for he VRF coordinator.
+    *The second parameter is an address for the LINK token.
+    *Both parameters obtained from docs.chain.link website.
+     */
     constructor() VRFConsumerBase(0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9, 0xa36085F69e2889c224210F603D836748e7dC0088) {
         keyHash = 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4;
-        fee = 0.1 * 10 ** 18; // 0.1 LINK (Varies by network)    
+        fee = 0.1 * 10 ** 18; // 0.1 LINK (Varies by network)
+        /*
+        *At this point, in the constructor, we've set
+        *_vrfCoordinator address
+        * LINK token address
+        * keyHash (public key against which randomness generated)
+        * fee
+        */    
     }
 
     /**
     * Requests Randomness
+    * Inherits the requestRandomness function from VRFConsumerBase
+    * Inherits the makeRequestId function from VRFConsumerBase, which is inherited from VRFRequestIDBase
     */
     function getRandomNumber() public returns (bytes32 requestId) {
-        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
+        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");//Making sure this address has more LINK than the fee.
         return requestRandomness(keyHash, fee);
+        /*
+        * Basically, we return
+        * keccak256(abi.encodePacked(_keyHash, _vRFInputSeed));
+        * Which is the 'requestId' variable
+        *
+        *_vRFInputSeed is uint256(keccak256(abi.encode(_keyHash, _userSeed, _requester, _nonce)));
+        * So 
+        * bytes32 requestId is basically
+        *   _keyHash
+                which is basically a 64 digit length hex string,
+        *   combined with
+                (64 digit length hex string + '_userSeed' + '_requester' + '_nonce')
+        */ 
     }
 
     /**
