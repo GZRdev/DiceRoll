@@ -70,24 +70,38 @@ contract VRFDiceRoll is VRFConsumerBase {
         * keccak256(abi.encodePacked(_keyHash, _vRFInputSeed));
         * Which is the 'requestId' variable
         *
-        *_vRFInputSeed is uint256(keccak256(abi.encode(_keyHash, _userSeed, _requester, _nonce)));
+        *       _vRFInputSeed is uint256(keccak256(abi.encode(_keyHash, _userSeed, _requester, _nonce)));
+                    which is basically a 64 digit hex converted to a really big uint number
         * So 
         * bytes32 requestId is basically
         *   _keyHash
                 which is basically a 64 digit length hex string,
         *   concatenated with
-                (64 digit length hex string + uint256'_userSeed' + address'_requester' + uint256'_nonce')
-        *   After concatenation, this big long thing is converted into a 64 digit hex "string" that acts as your requestId.
+                uint256(64 digit length hex string + uint256'_userSeed' + address'_requester' + uint256'_nonce')
+        *   After concatenation, this big long thing is converted into a 64 digit hex "string" of type bytes32, that acts as your requestId.
+                It would look like 0xcA429582aC1eaB01B337b59E899D75242011702B or something like that.
+        
+        *TL;DR this function returns a requestId.
         */ 
-    }
-
     /**
     * Callback function used by VRF Coordinator
     */
+    }
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
         randomResult = randomness;
+
+        /*
+        * Basically this function gives the requestId to the VRFCoordinator
+        * VRFCoordinator then returns a random uint256 number to the variable 'randomness'
+            We store the result in randomResult
+        */
+        
     }
 
+    function rollDice() public view returns(uint256 roll){
+        return roll = (randomResult % 6) + 1;
+    }
+    
     // function withdrawLink() external {} - Implement a withdraw function to avoid locking your LINK in the contract
     
     /**
@@ -100,10 +114,18 @@ contract VRFDiceRoll is VRFConsumerBase {
      */
     
     
-    
-    
-    function withdrawLink() external {
-
+    //will figure this out later
+    /*   
+    function withdrawLink() external payable onlyOwner {
+        payable(owner()).transfer(address(this).balance);
     }
+    */
+
+
+    /*
+    *   Notes to self- for this to work, you have to create the contract
+    *   Once the contract is created, you have to FUND the contract
+    *   Like literally send funds TO the contract from your wallet so they are actually IN the contract.
+    */
 
 }
