@@ -88,7 +88,7 @@ contract VRFDiceRoll is VRFConsumerBase {
     */
     }
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
-        randomResult = randomness;
+        randomResult = (randomness%6)+1;
 
         /*
         * Basically this function gives the requestId to the VRFCoordinator
@@ -96,10 +96,6 @@ contract VRFDiceRoll is VRFConsumerBase {
             We store the result in randomResult
         */
         
-    }
-
-    function rollDice() public view returns(uint256 roll){
-        return roll = (randomResult % 6) + 1;
     }
     
     // function withdrawLink() external {} - Implement a withdraw function to avoid locking your LINK in the contract
